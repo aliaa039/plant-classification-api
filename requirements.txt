@@ -18,7 +18,4 @@ torchvision>=0.17
 timm>=0.9.12
 Pillow>=10.0.0
 gdown==5.1.0
-*.pth
-.venv/
-__pycache__/
-.vscode/
+
