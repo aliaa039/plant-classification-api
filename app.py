@@ -1,11 +1,25 @@
+import os
+import gdown
 import torch
 import timm
 from flask import Flask, request, jsonify
 from torchvision import transforms
 from PIL import Image
+import gdown
+
 
 # Flask setup
 app = Flask(__name__)
+
+# Model path and Google Drive file ID
+model_path = "plant_best_model(1).pth"
+google_drive_id = "1orewvjx91kRCpwH_0Zlhc4HbNz3--ybt"
+
+
+if not os.path.exists(model_path):
+    print("Downloading model from Google Drive...")
+    url = f"https://drive.google.com/uc?id={google_drive_id}"
+    gdown.download(url, model_path, quiet=False)
 
 # Load model function
 def load_model(model_path, num_classes):
@@ -14,12 +28,11 @@ def load_model(model_path, num_classes):
     model.eval()
     return model
 
-# Load your trained model
-model_path = "plant_best_model(1).pth"  
+# Load the trained model
 num_classes = 30
 model = load_model(model_path, num_classes)
 
-# Class names: النباتات فقط
+# Class names
 class_names = [
     "aloevera", "banana", "bilimbi", "cantaloupe", "cassava", "coconut",
     "corn", "cucumber", "curcuma", "eggplant", "galangal", "ginger",
@@ -40,11 +53,9 @@ transform = transforms.Compose([
 def predict_image(file):
     image = Image.open(file).convert("RGB")
     image = transform(image).unsqueeze(0)
-
     with torch.no_grad():
         output = model(image)
         _, predicted = torch.max(output, 1)
-
     return class_names[predicted.item()]
 
 # API endpoint
@@ -52,7 +63,6 @@ def predict_image(file):
 def predict():
     if 'imagefile' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
-
     file = request.files['imagefile']
     try:
         prediction = predict_image(file)
