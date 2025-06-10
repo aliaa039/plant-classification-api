@@ -52,7 +52,7 @@ transform = transforms.Compose([
 # Prediction function
 def predict_image(file):
     image = Image.open(file).convert("RGB")
-    image = transform(image).unsqueeze(0)
+    image = transform(image).unsqueeze(0).to("cpu")  # <-- أهو التعديل هنا
     with torch.no_grad():
         output = model(image)
         _, predicted = torch.max(output, 1)
